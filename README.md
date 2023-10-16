@@ -3,14 +3,22 @@
 
 This is a user-friendly news research tool designed for effortless information retrieval. Users can input article URLs and ask questions to receive relevant insights from the stock market and financial domain.
 
+## Need for this tool
+Copy and pasting article in ChatGPT is tedious
+Need for an aggregate knowledge base: One might not know which article to pull answers from and there might even be need for multiple articles
+ChatGPT has a 3000 word limit
 
+We need to use semantic search to find relevant chunks of data in the articles provided, because there are token limits on OpenAI of 4097. To do this we do embeddings (allows to figure out relevant chunk) and vector databases (for faster checks). We merge split chunks to make them closer to the token limit (for efficiency) and then allow overlap between chunks to provide context (one chunk might need info frmo the previous chunk to make sense). Langchain has a TextSplitter
+API (RecursiveCharacterTextSplitter) that does this for you. It works by splitting on one character, adn if a chunk is too big (bigger than specified), it tries the other characters you give it to split the chunk, and if it's too small, merges chunks.
+
+On the chunks, we convert them to vectors using Huggingface sentence transformer. We then use FAISS Index to do fast similarity search with the vectors. Since the chunks combined size might be greater than the token limit, we use the MapReduce method, as opposed to the stuff method. We do 5 LLM calls (imagine we have 4 chunks) - 4 for each chunk to see the answer based on each individual chunk, then you combine the answers of the for LLM calls to one summary, and one final LLM call on the summary chunk to get the final answer
 
 ## Features
 
 - Load URLs or upload text files containing URLs to fetch article content.
 - Process article content through LangChain's UnstructuredURL Loader
 - Construct an embedding vector using OpenAI's embeddings and leverage FAISS, a powerful similarity search library, to enable swift and effective retrieval of relevant information
-- Interact with the LLM's (Chatgpt) by inputting queries and receiving answers along with source URLs.
+- Interact with the LLM's (ChatGPT) by inputting queries and receiving answers along with source URLs.
 
 
 ## Installation
